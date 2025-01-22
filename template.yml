@@ -2,7 +2,6 @@ Parameters:
   RegionId:
     Description: Define region for deployment
     Type: String
-    Default: !Sub "${AWS:region}"
     AllowedValues:
       - ap-southeast-1
       - ap-southeast-2
@@ -150,7 +149,7 @@ Resources:
                 "legend": {
                   "position": "bottom"
                 },
-                "region": "${aws:region}",
+                "region": "${RegionId}",
                 "liveData": false,
                 "title": "CommandsFailed: Sum"
               }

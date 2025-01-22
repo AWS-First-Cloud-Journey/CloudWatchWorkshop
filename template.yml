@@ -1,4 +1,35 @@
+Parameters:
+  RegionId:
+    Description: Define region for deployment
+    Type: String
+    Default: ap-southeast-1
+    AllowedValues:
+      - ap-southeast-1
+      - ap-southeast-2
+      - us-east-1
+      - us-east-2
+  SsmParameterValueawsserviceamiamazonlinuxlatestamzn2amihvmarm64gp2C96584B6F00A464EAD1953AFF4B05118Parameter:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: /aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-arm64-gp2
 Resources:
+  EC2Role:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Description: "Grant Administrator's Permissions to EC2 Instance"
+      ManagedPolicyArns: 
+        - arn:aws:iam::aws:policy/AdministratorAccess
+      MaxSessionDuration: 3600
+      Path: /
+      RoleName: TeamRole
   CloudWatchAgentConfigurationB404662A:
     Type: AWS::SSM::Parameter
     Properties:
@@ -67,8 +98,6 @@ Resources:
           - AmazonCloudWatch-linux
         optionalConfigurationSource:
           - ssm
-        optionalOpenTelemetryCollectorConfigurationSource:
-          - ssm
         optionalRestart:
           - "yes"
       ScheduleExpression: cron(0 */30 * * * ? *)
@@ -99,7 +128,7 @@ Resources:
                 "legend": {
                   "position": "bottom"
                 },
-                "region": "ap-southeast-1",
+                "region": "${aws:region}",
                 "liveData": false,
                 "title": "CommandsDeliveryTimedOut: Sum"
               }
@@ -121,7 +150,7 @@ Resources:
                 "legend": {
                   "position": "bottom"
                 },
-                "region": "ap-southeast-1",
+                "region": "${aws:region}",
                 "liveData": false,
                 "title": "CommandsFailed: Sum"
               }
@@ -143,7 +172,7 @@ Resources:
                 "legend": {
                   "position": "bottom"
                 },
-                "region": "ap-southeast-1",
+                "region": "${aws:region}",
                 "liveData": false,
                 "title": "CommandsSucceeded: Sum"
               }
@@ -166,7 +195,7 @@ Resources:
       CidrBlock: 10.0.0.0/18
       VpcId:
         Ref: EE2A327EC4
-      AvailabilityZone: ap-southeast-1a
+      AvailabilityZone: !Sub "${RegionId}a"
       MapPublicIpOnLaunch: true
       Tags:
         - Key: aws-cdk:subnet-name
@@ -225,7 +254,7 @@ Resources:
       CidrBlock: 10.0.64.0/18
       VpcId:
         Ref: EE2A327EC4
-      AvailabilityZone: ap-southeast-1b
+      AvailabilityZone: !Sub "${RegionId}b"
       MapPublicIpOnLaunch: true
       Tags:
         - Key: aws-cdk:subnet-name
@@ -284,7 +313,7 @@ Resources:
       CidrBlock: 10.0.128.0/18
       VpcId:
         Ref: EE2A327EC4
-      AvailabilityZone: ap-southeast-1a
+      AvailabilityZone: !Sub "${RegionId}a"
       MapPublicIpOnLaunch: false
       Tags:
         - Key: aws-cdk:subnet-name
@@ -322,7 +351,7 @@ Resources:
       CidrBlock: 10.0.192.0/18
       VpcId:
         Ref: EE2A327EC4
-      AvailabilityZone: ap-southeast-1b
+      AvailabilityZone: !Sub "${RegionId}b"
       MapPublicIpOnLaunch: false
       Tags:
         - Key: aws-cdk:subnet-name
@@ -392,11 +421,11 @@ Resources:
     Type: AWS::IAM::InstanceProfile
     Properties:
       Roles:
-        - TeamRole
+        - !Ref EC2Role
   InstanceAtestinstanceA142BF03:
     Type: AWS::EC2::Instance
     Properties:
-      AvailabilityZone: ap-southeast-1a
+      AvailabilityZone: !Sub "${RegionId}a"
       IamInstanceProfile:
         Ref: InstanceAtestinstanceInstanceProfile55DFBB6D
       ImageId:
@@ -447,11 +476,11 @@ Resources:
     Type: AWS::IAM::InstanceProfile
     Properties:
       Roles:
-        - TeamRole
+        - !Ref EC2Role
   InstanceBtestinstance604248CD:
     Type: AWS::EC2::Instance
     Properties:
-      AvailabilityZone: ap-southeast-1a
+      AvailabilityZone: !Sub "${RegionId}a"
       IamInstanceProfile:
         Ref: InstanceBtestinstanceInstanceProfileB0AD13DB
       ImageId:
@@ -503,11 +532,11 @@ Resources:
     Type: AWS::IAM::InstanceProfile
     Properties:
       Roles:
-        - TeamRole
+        - !Ref EC2Role
   InstanceCtestinstanceE908D38B:
     Type: AWS::EC2::Instance
     Properties:
-      AvailabilityZone: ap-southeast-1a
+      AvailabilityZone: !Sub "${RegionId}a"
       IamInstanceProfile:
         Ref: InstanceCtestinstanceInstanceProfileF6D08129
       ImageId:
@@ -558,11 +587,11 @@ Resources:
     Type: AWS::IAM::InstanceProfile
     Properties:
       Roles:
-        - TeamRole
+        - !Ref EC2Role
   InstanceDtestinstanceDAA91129:
     Type: AWS::EC2::Instance
     Properties:
-      AvailabilityZone: ap-southeast-1a
+      AvailabilityZone: !Sub "${RegionId}a"
       IamInstanceProfile:
         Ref: InstanceDtestinstanceInstanceProfile8470A1E9
       ImageId:
@@ -613,11 +642,11 @@ Resources:
     Type: AWS::IAM::InstanceProfile
     Properties:
       Roles:
-        - TeamRole
+        - !Ref EC2Role
   InstanceEtestinstanceFD2332AA:
     Type: AWS::EC2::Instance
     Properties:
-      AvailabilityZone: ap-southeast-1a
+      AvailabilityZone: !Sub "${RegionId}a"
       IamInstanceProfile:
         Ref: InstanceEtestinstanceInstanceProfile52C33B3A
       ImageId:
@@ -643,8 +672,3 @@ Resources:
           cd /tmp
           aws s3 cp s3://workshop-template-bucket/logger.py .
           chmod a+x logger.py
-Parameters:
-  SsmParameterValueawsserviceamiamazonlinuxlatestamzn2amihvmarm64gp2C96584B6F00A464EAD1953AFF4B05118Parameter:
-    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
-    Default: /aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-arm64-gp2
-

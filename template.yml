@@ -2,7 +2,7 @@ Parameters:
   RegionId:
     Description: Define region for deployment
     Type: String
-    Default: ap-southeast-1
+    Default: $AWS:region
     AllowedValues:
       - ap-southeast-1
       - ap-southeast-2

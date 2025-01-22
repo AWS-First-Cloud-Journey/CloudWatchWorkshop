@@ -2,7 +2,7 @@ Parameters:
   RegionId:
     Description: Define region for deployment
     Type: String
-    Default: $AWS:region
+    Default: !Sub "${AWS:region}"
     AllowedValues:
       - ap-southeast-1
       - ap-southeast-2
@@ -108,7 +108,7 @@ Resources:
   ssmDashboard:
     Type: AWS::CloudWatch::Dashboard
     Properties:
-      DashboardBody: |
+      DashboardBody: !Sub |
         {
           "widgets": [
             {
@@ -128,7 +128,7 @@ Resources:
                 "legend": {
                   "position": "bottom"
                 },
-                "region": "${aws:region}",
+                "region": "${RegionId}",
                 "liveData": false,
                 "title": "CommandsDeliveryTimedOut: Sum"
               }
@@ -172,7 +172,7 @@ Resources:
                 "legend": {
                   "position": "bottom"
                 },
-                "region": "${aws:region}",
+                "region": "${RegionId}",
                 "liveData": false,
                 "title": "CommandsSucceeded: Sum"
               }
